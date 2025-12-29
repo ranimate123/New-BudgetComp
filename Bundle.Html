@@ -1,0 +1,288 @@
+<template>
+    <lightning-card title="Marketing Budget">
+    <div class="slds-p-around_medium">
+        <lightning-button
+            label="Open Marketing Budget"
+            onclick={openModal}
+            variant="brand">
+        </lightning-button>
+    </div>
+
+
+        <!-- Modal -->
+        <template if:true={isModalOpen}>
+            <section
+                role="dialog"
+                tabindex="-1"
+                class="slds-modal slds-fade-in-open">
+
+                <div class="slds-modal__container">
+
+                   <header class="slds-modal__header">
+    <h2 class="slds-text-heading_medium">
+        Marketing Expense Calculation
+    </h2>
+    <p>Total Planned Budget: 
+        <lightning-formatted-number value={plannedBudget} format-style="currency" currency-code="INR" maximum-fraction-digits="2"></lightning-formatted-number>
+    </p>
+    <p>Used Budget: 
+        <lightning-formatted-number value={usedBudget} format-style="currency" currency-code="INR" maximum-fraction-digits="2"></lightning-formatted-number>
+    </p>
+    <p>Remaining Budget: 
+        <lightning-formatted-number value={remainingBudget} format-style="currency" currency-code="INR" maximum-fraction-digits="2"></lightning-formatted-number>
+    </p>
+
+  
+</header>
+
+
+
+                    <!-- Modal Body -->
+                    <div class="slds-modal__content slds-p-around_medium">
+
+                        <!-- MAIN BUDGET TABLE -->
+                        <table class="slds-table slds-table_bordered slds-table_cell-buffer" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Seq</th>
+                                    <th>Description</th>
+                                    <th>Amount (INR)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="h-line">
+                                    <td>A</td>
+                                    <td>Project Cost</td>
+                                    <td>
+                                        <lightning-formatted-number
+                                            value={projectCost}
+                                            format-style="currency"
+                                            currency-code="INR"
+                                            maximum-fraction-digits="2">
+                                        </lightning-formatted-number>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>B</td>
+                                    <td>Marketing Expense Planned Budget (%)</td>
+                                    <td>
+                                        <lightning-input
+                                            type="number"
+                                            value={marketingPercent}
+                                            data-group="marketing"
+                                            data-type="percent"
+                                            onchange={handleChange}
+                                            min="0"
+                                            max="100"
+                                            step="0.01">
+                                        </lightning-input>
+                                    </td>
+                                </tr>
+
+                                <tr class="h-line">
+
+                                    <td>C</td>
+                                    <td>Marketing Expense Planned Budget Amount</td>
+                                    <td>
+                                        <lightning-input
+                                            type="number"
+                                            value={marketingAmount}
+                                            data-group="marketing"
+                                            data-type="amount"
+                                            onchange={handleChange}
+                                            min="0">
+                                        </lightning-input>
+                                    </td>
+                                </tr>
+
+
+ 
+                                <tr>
+                                    <td>D</td>
+                                    <td>CP Expense Planned Budget Percentage</td>
+                                    <td>
+                                        <lightning-input
+                                            type="number"
+                                            value={cpPercent}
+                                            data-group="cp"
+                                            data-type="percent"
+                                            onchange={handleChange}
+                                            min="0"
+                                            max="100"
+                                            step="0.01">
+                                        </lightning-input>
+                                    </td>
+                                </tr>
+
+                                <tr class="h-line">
+                                    <td>E</td>
+                                    <td>CP Expense Planned Budget Amount</td>
+                                    <td>
+                                        <lightning-input
+                                            type="number"
+                                            value={cpAmount}
+                                            data-group="cp"
+                                            data-type="amount"
+                                            onchange={handleChange}
+                                            min="0">
+                                        </lightning-input>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>F</td>
+                                    <td>Other Expense Planned Budget Percentage</td>
+                                    <td>
+                                        <lightning-input
+                                            type="number"
+                                            value={otherPercent}
+                                            data-group="other"
+                                            data-type="percent"
+                                            onchange={handleChange}
+                                            min="0"
+                                            max="100"
+                                            step="0.01">
+                                        </lightning-input>
+                                    </td>
+                                </tr>
+
+                                <tr class="h-line">
+                                    <td>G</td>
+                                    <td>Other Expense Planned Budget Amount</td>
+                                    <td>
+                                        <lightning-input
+                                            type="number"
+                                            value={otherAmount}
+                                            data-group="other"
+                                            data-type="amount"
+                                            onchange={handleChange}
+                                            min="0">
+                                        </lightning-input>
+                                    </td>
+                                </tr>
+
+                                <tr class="slds-theme_shade">
+                                    <td>H</td>
+                                    <td style="font-weight:600">
+                                        Planned Budget for Online and Offline Marketing(C - E - G)
+                                    </td>
+                                    <td style="font-weight:600; text-align:right">
+                                        <lightning-formatted-number
+                                            value={plannedBudget}
+                                            format-style="currency"
+                                            currency-code="INR"
+                                            maximum-fraction-digits="2">
+                                        </lightning-formatted-number>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- YEARS INPUT -->
+                        <div class="slds-m-top_medium">
+                            <lightning-input
+                                type="number"
+                                label="For how many years"
+                                value={numberOfYears}
+                                onchange={handleYearsChange}
+                                min="1"
+                                step="1">
+                            </lightning-input>
+                        </div>
+
+                        <!-- DYNAMIC YEAR-WISE TABLES -->
+                        <template for:each={yearTables} for:item="yearData">
+                            <div key={yearData.year} class="slds-m-top_large slds-box">
+
+                                <!-- Year Header -->
+                                <div class="slds-text-heading_medium slds-m-bottom_x-small">
+                                    Year {yearData.year}
+                                </div>
+
+                                <div class="slds-text-title_bold slds-m-bottom_small">
+                                    <lightning-input
+      type="number"
+      label="Planned Budget Percentage for Online and Offline Marketing(%)"
+      value={yearData.percent}
+      data-year={yearData.year}
+      onchange={handleYearPercentChange}
+      min="0"
+      max="100"
+      step="0.01">
+  </lightning-input>
+
+  <lightning-input
+      type="number"
+      label="Planned Budget Value for Online and Offline Marketing"
+      value={yearData.totalBudget}
+      data-year={yearData.year}
+      onchange={handleYearTotalChange}>
+  </lightning-input>
+  
+
+  <!-- Lead Gen Target -->
+  <lightning-input
+      type="number"
+      label="Lead Gen Target"
+      value={yearData.leadTarget}
+      data-year={yearData.year}
+      onchange={handleLeadTargetChange}>
+  </lightning-input>
+
+</div>
+
+
+                                <!-- Quarter Table -->
+                                <table class="slds-table slds-table_bordered slds-table_cell-buffer">
+                                    <thead>
+                                        <tr>
+                                            <template for:each={yearData.quarters} for:item="q">
+                                                <th key={q.label}>{q.label}</th>
+                                            </template>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <template for:each={yearData.quarters} for:item="q">
+                                                <td key={q.label}>
+                                                    <lightning-input
+                                                     type="number"
+                                                     value={q.amount}
+                                                     data-year={yearData.year}
+                                                     data-quarter={q.label}
+                                                     onchange={handleQuarterChange}>
+                                                    </lightning-input>
+
+                                                </td>
+                                            </template>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </template>
+
+                    </div>
+
+                    <!-- Footer -->
+                    <footer class="slds-modal__footer">
+                        <lightning-button class='slds-var-m-right_small'
+                            label="Save Budget"
+                            variant="brand"
+                            onclick={saveBudgetRecord}>
+                        </lightning-button>
+                        <lightning-button
+                            label="Cancel"
+                            onclick={closeModal}>
+                        </lightning-button>
+                    </footer>
+
+                </div>
+            </section>
+
+            <!-- Backdrop -->
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </lightning-card>
+</template>
